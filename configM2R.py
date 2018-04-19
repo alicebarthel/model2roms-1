@@ -108,7 +108,7 @@ class Model2romsConfig(object):
 
     def defineromsgridpath(self):
         return {'A20': '/home/trondk/Projects/A20/Grid/A20niva_grd_v1.nc',
-                'ROHO800': '/global/homes/a/abarthel/data/forcingfields/fromTrond/ROHO800_grid.nc'}[self.outgrid]
+                'ROHO800': '/global/homes/a/abarthel/ROMS/so_grd.rtopo2.2.small.5km.nc'}[self.outgrid]
 
     def defineforcingdatapath(self):
         return {'SODA3': "/global/homes/a/abarthel/data/forcingfields/fromTrond/",
