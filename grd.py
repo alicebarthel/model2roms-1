@@ -93,6 +93,7 @@ class Grd:
         if self.type == 'WOAMONTHLY': self.fill_value = 9.96921e+36
         if self.type == 'SODA': self.fill_value = -9.99e+33
         if self.type == 'SODA3': self.fill_value = -1.e+20
+        if self.type == 'SODA3MONTHLY': self.fill_value = -1.e+20
         if self.type == 'SODAMONTHLY': self.fill_value = -9.99e+33
         if self.type == 'GLORYS': self.fill_value = 9.96921e+36
         if self.type == 'NS8KMZ': self.fill_value = 9.96921e+36

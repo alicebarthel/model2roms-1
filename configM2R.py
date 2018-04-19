@@ -88,6 +88,7 @@ class Model2romsConfig(object):
 
         return {'SODA': ['temperature', 'salinity', 'ssh', 'uvel', 'vvel'],
                 'SODA3': ['temperature', 'salinity','ssh', 'uvel', 'vvel'],
+                'SODA3MONTHLY': ['temperature', 'salinity','ssh', 'uvel', 'vvel'],
                 'GLORYS': ['temperature', 'salinity', 'ssh', 'uvel', 'vvel', 'uice', 'vice', 'aice', 'hice'],
                 'WOAMONTHLY': ['temperature', 'salinity'],
                 'NORESM': ['temperature', 'salinity', 'ssh', 'uvel', 'vvel', 'ageice', 'uice', 'vice', 'aice', 'hice']}[
@@ -100,6 +101,7 @@ class Model2romsConfig(object):
 
         return {'SODA': ['temperature', 'salinity', 'ssh', 'uvel', 'vvel'],
                 'SODA3': ['temp', 'salt', 'ssh', 'u', 'v'],
+                'SODA3MONTHLY': ['temp', 'salt', 'ssh', 'u', 'v'],
                 'GLORYS': ['votemper', 'vosaline', 'sossheig', 'vozocrtx', 'vomecrty', 'iicevelu', 'iicevelv',
                            'ileadfra', 'iicethic'],
                 'WOAMONTHLY': ['temperature', 'salinity'],
@@ -112,6 +114,7 @@ class Model2romsConfig(object):
 
     def defineforcingdatapath(self):
         return {'SODA3': "/global/homes/a/abarthel/data/forcingfields/fromTrond/",
+        	'SODA3MONTHLY': "/global/homes/a/abarthel/data/forcingfields/fromTrond/",
                 'NORESM': "/Volumes/MacintoshHD2/Datasets",
                 'WOAMONTHLY': "/Users/trondkr/Projects/is4dvar/createSSS/"}[self.indatatype]
 
@@ -164,7 +167,7 @@ class Model2romsConfig(object):
         #  Define what grid type you wnat to interpolate from (input MODEL data)
         # Options:
         # 1. SODA, 2. SODAMONTHLY, 3.WOAMONTHLY, 4. NORESM, 4. GLORYS, 5. SODA3
-        self.indatatype = 'SODA3'
+        self.indatatype = 'SODA3MONTHLY'
 
         # Define what grid type you wnat to interpolate from: Can be Z for SIGMA for ROMS
         # vertical coordinate system or ZLEVEL. also define the name of the dimensions in the input files.

@@ -201,6 +201,9 @@ def getTime(dataPath, indatatype, grdROMS, grdMODEL, year, month, day, mytime, f
     if indatatype == 'SODA3':
         filename = getSODA3filename(year, month, day, None, dataPath)
 
+    if indatatype == 'SODA3MONTHLY':
+        filename = getSODA3MONTHLYfilename(year, month, day, None, dataPath)
+
     if indatatype == 'SODAMONTHLY':
         filename = getSODAMONTHLYfilename(year, month, day, None, dataPath)
 
@@ -231,6 +234,8 @@ def getTime(dataPath, indatatype, grdROMS, grdMODEL, year, month, day, mytime, f
     elif indatatype=='NS8KM':
         jdref = date2num(datetime(1948,1,1),cdf.variables["ocean_time"].units,calendar=cdf.variables["ocean_time"].calendar)
     elif indatatype=='SODA3':
+        jdref = date2num(datetime(1948,1,1),units="days since 1948-01-01 00:00:00",calendar="standard")
+    elif indatatype=='SODA3MONTHLY':
         jdref = date2num(datetime(1948,1,1),units="days since 1948-01-01 00:00:00",calendar="standard")
     else:
         jdref = date2num(datetime(1948,1,1),cdf.variables["time"].units,calendar=cdf.variables["time"].calendar)
@@ -274,6 +279,16 @@ def getTime(dataPath, indatatype, grdROMS, grdMODEL, year, month, day, mytime, f
         myunits = cdf.variables["time"].units
         currentdate = datetime(year, month, day)
         jd =  date2num(currentdate,units="days since 1948-01-01 00:00:00",calendar="standard")
+
+    if indatatype == 'SODA3MONTHLY':
+        # Each SODA file represents 12 month averages.
+        
+	#mycalendar = cdf.variables["time"].calendar
+        #myunits = cdf.variables["time"].units
+        currentdate = datetime(year, month, day)
+        jd =  date2num(currentdate,units="days since 1948-01-01 00:00:00",calendar="standard")
+	myunits = "days since 1948-01-01 00:00:00"
+	mycalendar = "standard"
 
     if indatatype == 'GLORYS':
         # Find the day and month that the GLORYS file respresents based on the year and ID number.
@@ -443,6 +458,15 @@ def getSODA3filename(year, month, day, myvar, dataPath):
 
     return dataPath + file
 
+def getSODA3MONTHLYfilename(year, month, day, myvar, dataPath):
+
+    if (myvar in ['cn', 'hi', 'hs']):
+        file = "soda3.3.1_mn_ice_reg_"+str(year)+".nc"
+    else:
+        file = "soda3.3.1_mn_ocean_reg_"+str(year)+".nc"
+
+    return dataPath + file
+
 def getWOAMONTHLYfilename(year, month, day, myvar, dataPath):
 
     if myvar == "temperature":
@@ -472,6 +496,12 @@ def get3Ddata(grdROMS, grdMODEL, myvar, indatatype, year, month, day, dataPath):
 
         if indatatype == "SODA3":
             filename = getSODA3filename(year, month, day, grdROMS.varNames[varN], dataPath)
+            cdf = Dataset(filename)
+            print("=>Extracting data for month %s from SODA3 %s "%(month-1,filename))
+            data = cdf.variables[grdROMS.vars[varN]][month-1,:,:,:]
+
+        if indatatype == "SODA3MONTHLY":
+            filename = getSODA3MONTHLYfilename(year, month, day, grdROMS.varNames[varN], dataPath)
             cdf = Dataset(filename)
             print("=>Extracting data for month %s from SODA3 %s "%(month-1,filename))
             data = cdf.variables[grdROMS.vars[varN]][month-1,:,:,:]
@@ -546,6 +576,16 @@ def get3Ddata(grdROMS, grdMODEL, myvar, indatatype, year, month, day, dataPath):
                         int(grdMODEL.indices[1, 2]):int(grdMODEL.indices[1, 3]),
                         int(grdMODEL.indices[1, 0]):int(grdMODEL.indices[1, 1])]
 
+            if indatatype == "SODA3MONTHLY":
+                filename = getSODA3MONTHLYfilename(year,month,day,grdROMS.varNames[varN],dataPath)
+                cdf = Dataset(filename)
+
+                data1 = cdf.variables[grdROMS.varNames[varN]][month-1, :,
+                        int(grdMODEL.indices[0, 2]):int(grdMODEL.indices[0, 3]),
+                        int(grdMODEL.indices[0, 0]):int(grdMODEL.indices[0, 1])]
+                data2 = cdf.variables[grdROMS.varNames[varN]][month-1, :,
+                        int(grdMODEL.indices[1, 2]):int(grdMODEL.indices[1, 3]),
+                        int(grdMODEL.indices[1, 0]):int(grdMODEL.indices[1, 1])]
 
             if indatatype == "SODAMONTHLY":
                 filename = getSODAMONTHLYfilename(year, month, day, None, dataPath)
@@ -606,6 +646,14 @@ def get3Ddata(grdROMS, grdMODEL, myvar, indatatype, year, month, day, dataPath):
 
             if indatatype == "SODA3":
                 filename = getSODA3filename(year,month,day,grdROMS.varNames[varN],dataPath)
+                cdf = Dataset(filename)
+
+                data = cdf.variables[str(grdROMS.varNames[varN])][month-1, :,
+                       int(grdMODEL.indices[0, 2]):int(grdMODEL.indices[0, 3]),
+                       int(grdMODEL.indices[0, 0]):int(grdMODEL.indices[0, 1])]
+
+            if indatatype == "SODA3MONTHLY":
+                filename = getSODA3MONTHLYfilename(year,month,day,grdROMS.varNames[varN],dataPath)
                 cdf = Dataset(filename)
 
                 data = cdf.variables[str(grdROMS.varNames[varN])][month-1, :,
@@ -692,6 +740,11 @@ def get2Ddata(grdROMS, grdMODEL, myvar, indatatype, year, month, day, dataPath):
         if myvar == 'hice':   varN = 6;  SSHdata = np.zeros((indexROMS_SSH), dtype=np.float64)
         if myvar == 'snow_thick': varN = 7;  SSHdata = np.zeros((indexROMS_SSH), dtype=np.float64)
         
+    if indatatype == "SODA3MONTHLY":
+        if myvar == 'aice':   varN = 5;  SSHdata = np.zeros((indexROMS_SSH), dtype=np.float64)
+        if myvar == 'hice':   varN = 6;  SSHdata = np.zeros((indexROMS_SSH), dtype=np.float64)
+        if myvar == 'snow_thick': varN = 7;  SSHdata = np.zeros((indexROMS_SSH), dtype=np.float64)
+        
     if myvar == 'ssh': varN = 2;  SSHdata = np.zeros((indexROMS_SSH), dtype=np.float64)
 
     if  grdMODEL.useESMF:
@@ -702,6 +755,21 @@ def get2Ddata(grdROMS, grdMODEL, myvar, indatatype, year, month, day, dataPath):
 
         if indatatype == "SODA3":
             filename = getSODA3filename(year, month, day, grdROMS.varNames[varN], dataPath)
+            print("Trying to open file %s"%(filename))
+            cdf = Dataset(filename)
+            if myvar == 'aice':
+                # We only extract the first thickness concentration. Need to fix this so all 5 classes can be extracted.
+                # http://www.atmos.umd.edu/~ocean/index_files/soda3_readme.htm
+                # hi: sea ice thickness [m ice]
+                # mi: sea ice mass [kg/m^2]
+                # hs: snow thickness [m snow]
+                # {cn1,cn2,cn3,cn4,cn5}: sea ice concentration [0:1] in five ice thickness classes
+                data = cdf.variables[grdROMS.varNames[varN]][int(month-1),0,:,:]
+            else:
+                data = cdf.variables[grdROMS.varNames[varN]][int(month-1),:,:]
+
+        if indatatype == "SODA3MONTHLY":
+            filename = getSODA3MONTHLYfilename(year, month, day, grdROMS.varNames[varN], dataPath)
             print("Trying to open file %s"%(filename))
             cdf = Dataset(filename)
             if myvar == 'aice':
@@ -784,6 +852,17 @@ def get2Ddata(grdROMS, grdMODEL, myvar, indatatype, year, month, day, dataPath):
                         int(grdMODEL.indices[1, 2]):int(grdMODEL.indices[1, 3]),
                         int(grdMODEL.indices[1, 0]):int(grdMODEL.indices[1, 1])]
 
+            if indatatype == "SODA3MONTHLY":
+                filename = getSODA3MONTHLYfilename(year,month,day,grdROMS.varNames[varN],dataPath)
+                cdf = Dataset(filename)
+
+                data1 = cdf.variables[grdROMS.varNames[varN]][int(month-1),
+                        int(grdMODEL.indices[0, 2]):int(grdMODEL.indices[0, 3]),
+                        int(grdMODEL.indices[0, 0]):int(grdMODEL.indices[0, 1])]
+                data2 = cdf.variables[grdROMS.varNames[varN]][int(month-1),
+                        int(grdMODEL.indices[1, 2]):int(grdMODEL.indices[1, 3]),
+                        int(grdMODEL.indices[1, 0]):int(grdMODEL.indices[1, 1])]
+
             if indatatype == "SODAMONTHLY":
                 filename = getSODAMONTHLYfilename(year, month, day, None, dataPath)
                 cdf = Dataset(filename)
@@ -843,6 +922,14 @@ def get2Ddata(grdROMS, grdMODEL, myvar, indatatype, year, month, day, dataPath):
                        int(grdMODEL.indices[0, 2]):int(grdMODEL.indices[0, 3]),
                        int(grdMODEL.indices[0, 0]):int(grdMODEL.indices[0, 1])]
 
+            if indatatype == "SODA3MONTHLY":
+                filename = getSODA3MONTHLYfilename(year,month,day,grdROMS.varNames[varN],dataPath)
+                cdf = Dataset(filename)
+
+                data = cdf.variables[str(grdROMS.varNames[varN])][int(month-1),
+                       int(grdMODEL.indices[0, 2]):int(grdMODEL.indices[0, 3]),
+                       int(grdMODEL.indices[0, 0]):int(grdMODEL.indices[0, 1])]
+
             if indatatype == "SODAMONTHLY":
                 filename = getSODAMONTHLYfilename(year, month, day, None, dataPath)
                 cdf = Dataset(filename)
@@ -896,6 +983,8 @@ def convertMODEL2ROMS(confM2R):
         fileNameIn = getSODAfilename(startdate.year, startdate.month, startdate.day, "salinity", dataPath)
     if confM2R.indatatype == 'SODA3':
         fileNameIn = getSODA3filename(confM2R.startdate.year, startdate.month, startdate.day, "salinity", dataPath)
+    if confM2R.indatatype == 'SODA3MONTHLY':
+        fileNameIn = getSODA3MONTHLYfilename(confM2R.startdate.year, startdate.month, startdate.day, "salinity", dataPath)
     if confM2R.indatatype == 'SODAMONTHLY':
         fileNameIn = getSODAfilename(startdate.year, startdate.month, startdate.day, "salinity", dataPath)
     if confM2R.indatatype == 'NORESM':
@@ -948,14 +1037,14 @@ def convertMODEL2ROMS(confM2R):
 
     for year in confM2R.years:
         months = datetimeFunctions.createListOfMonths(year,confM2R.startdate,confM2R.enddate,confM2R.isclimatology)
-        
+        print("(A.B) Month list:  %s"%months) 
         for month in months:
             days = datetimeFunctions.createListOfDays(year,month,confM2R.startdate,confM2R.enddate,confM2R.isclimatology,confM2R.timefrequencyofinputdata)
-
+	    print("(A.B) In month: %s  ; days list:  %s"%(month, days))
             for day in days:
                 # Get the current date for given timestep 
                 getTime(confM2R.modelpath, confM2R.indatatype, confM2R.grdROMS, confM2R.grdMODEL, year, month, day, time, firstRun)
-               
+                print("\n(A.B) Current time ; %s-%s-%s"%(year, month, days)) 
                 # Each MODEL file consist only of one time step. Get the subset data selected, and
                 # store that time step in a new array:
 
